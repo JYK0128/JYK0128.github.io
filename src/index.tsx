@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import Website from "./Website/Website";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 ReactDOM.render(
-    <App />,
+    <Website />,
     document.getElementById('root')
 );
