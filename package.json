@@ -1,6 +1,7 @@
 {
   "homepage": "JYK0128.github.io",
-  "name": "JYK0128.github.io",
+  "proxy": "http://api.jyworld.tk/frontend",
+  "name": "myweb",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
