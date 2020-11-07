@@ -1,2 +1,0 @@
-(this["webpackJsonpJYK0128.github.io"]=this["webpackJsonpJYK0128.github.io"]||[]).push([[0],{9:function(t,e,i){"use strict";i.r(e);var n=i(1),s=(i(0),i(3));var c=function(){return Object(n.jsx)("div",{className:"App",children:"hi"})};i.n(s).a.render(Object(n.jsx)(c,{}),document.getElementById("root"))}},[[9,1,2]]]);
-//# sourceMappingURL=main.3656b640.chunk.js.map
