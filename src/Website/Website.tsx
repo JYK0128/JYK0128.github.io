@@ -20,7 +20,7 @@ export default class Website extends React.Component<Props, State> {
     render() {
         return (
             <UserContext.Provider value={this.state}>
-                <Router>
+                <Router basename={process.env.PUBLIC_URL}>
                     <div className={'min-vh-100'}>
                         <Header/>
                         <Body/>
