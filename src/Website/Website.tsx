@@ -25,7 +25,7 @@ export default class Website extends React.Component<Props, State> {
                         <Header/>
                         <Body/>
                     </div>
-                    <Footer></Footer>
+                    <Footer/>
                 </Router>
             </UserContext.Provider>
         );
