@@ -1,3 +1,14 @@
 import React from 'react';
-import {State} from '../Website'
-export default React.createContext<State|null>(null);
+
+export type UserContextType = {
+    token: string | undefined,
+    nickname: string | undefined,
+    setContext: Function | undefined
+}
+
+// default value is for unit test
+export default React.createContext<UserContextType>({
+    token:undefined,
+    nickname:undefined,
+    setContext:undefined
+});

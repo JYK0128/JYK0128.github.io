@@ -1,68 +1,41 @@
-import React, {ComponentState} from 'react';
-import {Button, Modal, Form, ButtonProps} from "react-bootstrap";
+import React from 'react';
+import {Button, ButtonProps, Modal, Row, Form, Col, Container} from "react-bootstrap";
 import UserContext from "../Context/UserContext";
+import OauthProvider, {PopupWindow, UserInfo} from "../Utils/OauthProvider";
 
 type Props = ButtonProps & {};
-type State = { show: boolean, username: string, password: string };
+type State = { show: boolean };
 
 export default class Login extends React.Component<Props, State> {
     static contextType = UserContext;
 
     constructor(props: Props) {
         super(props);
-        this.state = {
-            show: false,
-            username: '',
-            password: ''
-        };
-        this.handleClose = this.handleClose.bind(this);
-        this.handleShow = this.handleShow.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
+        this.state = {show: false}
 
-    handleClose() {
-        this.setState({show: false});
+        this.handleShow = this.handleShow.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.handleLogin = this.handleLogin.bind(this);
     }
 
     handleShow() {
-        this.setState({show: true});
+        this.setState({show: true})
     }
 
-    handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({[e.target.id]: e.target.value} as ComponentState);
+    handleClose() {
+        this.setState({show: false})
     }
 
-    handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-
-        // Request
-        const token = localStorage.getItem('authorization') || '';
-        const data = JSON.stringify({"username": this.state.username, "password": this.state.password});
-        const requestOptions: RequestInit = {
-            method: 'POST',
-            headers: {"Content-Type": "application/json", "Authorization": token},
-            body: data
-        };
-
-        // Response
-        fetch('/login', requestOptions)
-            .then(test => {
-                console.log(test);
-                return test;
-            })
-            .then(response => response.headers.get('authorization'))
-            .then(authorization => {
-                if (authorization) {
-                    localStorage.setItem('username', this.state.username||'');
-                    localStorage.setItem('authorization', authorization||'');
-                    this.handleClose();
-                    this.context.setStore({username: this.state.username});
-                } else {
-                    alert('올바른 아이디 또는 비밀번호를 입력하세요.')
-                }
-            })
-            .catch(error => console.log('error', error));
+    handleLogin(e: React.MouseEvent<HTMLElement>) {
+        const server = OauthProvider(e.currentTarget.id);
+        const popup = PopupWindow(server);
+        popup
+            .then(popup => popup ? popup : Promise.reject(new Error("popup isn't working")))
+            .then(popup => server.getCode(popup))
+            .then(code => server.getAccessToken(code))
+            .then(token => UserInfo(token))
+            .then(userInfo => this.context.setContext(userInfo))
+            .catch(error => console.log(error))
     }
 
     render() {
@@ -70,29 +43,51 @@ export default class Login extends React.Component<Props, State> {
             <>
                 <Button className={this.props.className} variant={this.props.variant}
                         onClick={this.handleShow}>{this.props.children}</Button>
-                <Modal animation={false} show={this.state.show} onHide={this.handleClose}>
-                    <Form onSubmit={this.handleSubmit}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Log in</Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>
-                            <Form.Group>
-                                <Form.Label>ID</Form.Label>
-                                <Form.Control id={'username'} type="text" onChange={this.handleChange}/>
-                            </Form.Group>
+                <Modal animation={false} show={this.state.show}
+                       onHide={this.handleClose} backdrop={"static"} keyboard={false}>
+                    <Modal.Header closeButton>Register / Log In</Modal.Header>
+                    <Modal.Body>
+                        <Container fluid="sm">
+                            <Row sm={{cols: 1}}>
+                                <Form as={Col}>
+                                    <Form.Group as={Row} controlId="test">
+                                        <Form.Label column sm={{span: 2, offset: 1}}>ID</Form.Label>
+                                        <Col sm={{span: 8}}>
+                                            <Form.Control type="email" placeholder="Enter email"/>
+                                        </Col>
+                                    </Form.Group>
+                                    <Form.Group as={Row} controlId="formGroupPassword">
+                                        <Form.Label column sm={{span: 2, offset: 1}}>Password</Form.Label>
+                                        <Col sm={{span: 8}}>
+                                            <Form.Control type="password" placeholder="Password"/>
+                                        </Col>
+                                    </Form.Group>
 
-                            <Form.Group>
-                                <Form.Label>Password</Form.Label>
-                                <Form.Control id={'password'} type="password" onChange={this.handleChange}/>
-                            </Form.Group>
-                        </Modal.Body>
-                        <Modal.Footer>
-                            <Form.Group>
-                                <Form.Check type="checkbox" label="Remember Me"/>
-                            </Form.Group>
-                            <Button variant="primary" type="submit">Submit</Button>
-                        </Modal.Footer>
-                    </Form>
+                                    <Row className={"justify-content-md-center"}>
+                                        <Button as={Col} sm={{span: 10}} variant="primary" type="submit">
+                                            로그인
+                                        </Button>
+                                    </Row>
+                                    <Row className={"justify-content-md-center"}>
+                                        <Button as={Col} sm={{span: 5}} variant="info">
+                                            아이디/비밀번호 찾기
+                                        </Button>
+                                        <Button as={Col} sm={{span: 5}} variant="info">
+                                            회원가입
+                                        </Button>
+                                    </Row>
+                                </Form>
+                            </Row>
+
+                            <hr/>
+
+                            <Row>
+                                <Button as={Col} id={'google'} variant={'danger'} onClick={this.handleLogin}>Login with Google</Button>
+                                <Button as={Col} id={'naver'} variant={'success'} onClick={this.handleLogin}>Login with Naver</Button>
+                                <Button as={Col} id={'kakao'} variant={'warning'} onClick={this.handleLogin}>Login with Kakao</Button>
+                            </Row>
+                        </Container>
+                    </Modal.Body>
                 </Modal>
             </>
         )

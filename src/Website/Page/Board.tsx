@@ -1,11 +1,12 @@
 import React from 'react';
 import {Link} from "react-router-dom";
 import {Button} from "react-bootstrap";
+import UserContext from "../Context/UserContext";
 
 type Props = {};
 type State = { page: number, size: number };
 export default class Board extends React.Component<Props, State> {
-    private tbodyRef: React.RefObject<HTMLTableElement >;
+    private tbodyRef: React.RefObject<HTMLTableElement>;
 
     constructor(props: Props) {
         super(props);
@@ -14,7 +15,7 @@ export default class Board extends React.Component<Props, State> {
             size: 10
         };
 
-        this.tbodyRef = React.createRef<HTMLTableElement >();
+        this.tbodyRef = React.createRef<HTMLTableElement>();
         this.renderTable = this.renderTable.bind(this);
     }
 
@@ -45,7 +46,7 @@ export default class Board extends React.Component<Props, State> {
                     row.insertCell(1).innerText = post['tag']; // tag
                     row.insertCell(2).innerText = post['title']; // title
                     row.insertCell(3).innerText = 'none';  //writer
-                    row.insertCell(4).innerText = post['post_date']; // date
+                    row.insertCell(4).innerText = post['update']; // date
                     row.insertCell(5).innerText = '0'; //view
 
                     row.onclick = () => alert(post['content']);
@@ -64,11 +65,23 @@ export default class Board extends React.Component<Props, State> {
             <div className={'min-vh-100 offset-sm-2 col-sm-8'}>
                 <h2>My Board</h2>
 
-                <Link to="/editor">
-                    <Button color="white" className="float-right"
-                            style={{display: this.context.username ? 'none':''}} variant={'primary'}>작성</Button>
-                </Link>
-                <table className="table"  ref = {this.tbodyRef}>
+                <UserContext.Consumer>
+                    {(ctx) => {
+                        if(ctx.token){
+                            return (
+                                <Link to="/editor">
+                                    <Button color="white" className="float-right" variant={'primary'}>작성</Button>
+                                </Link>
+                            )
+                        }else{
+                            return (
+                                <Button> 투명 버튼 </Button>
+                            );
+                        }
+                    }}
+                </UserContext.Consumer>
+
+                <table className="table" ref = {this.tbodyRef}>
                     <thead>
                     <tr>
                         <th>No</th>
