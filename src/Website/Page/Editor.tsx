@@ -5,13 +5,18 @@ type Props = {};
 type State = {};
 
 export default class Editor extends React.Component<Props, State> {
-    constructor(props:Props) {
+    constructor(props: Props) {
         super(props);
 
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    handleSubmit(e:React.FormEvent<HTMLFormElement>){
+    handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+//        alert(e.currentTarget.childElementCount) // 5
+        const data = new FormData(e.currentTarget);
+
+        alert(JSON.stringify(data));
     }
 
     render() {
@@ -38,9 +43,10 @@ export default class Editor extends React.Component<Props, State> {
                         <Form.File multiple={true}/>
                     </Form.Group>
 
-                    <Button type="reset" variant={"warning"}>초기화</Button>
-                    <Button type="button" variant={"danger"} href={"#/board"}>취소</Button>
-                    <Button type="submit" variant={"primary"}>작성</Button>
+                    <Form.Group controlId={"formFile"}>
+                        <Button type="button" variant={"secondary"} href={"#/board"}>취소</Button>
+                        <Button type="submit" variant={"primary"}>작성</Button>
+                    </Form.Group>
                 </Form>
             </>
         );

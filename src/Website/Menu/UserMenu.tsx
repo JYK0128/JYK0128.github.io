@@ -14,14 +14,16 @@ export default class UserMenu extends React.Component<any, any> {
         this.context.setContext({
             token:undefined,
             nickname:undefined
-        })
+        });
+
+        sessionStorage.clear();
     }
 
     render() {
         return (
                 <NavDropdown title={this.context.nickname} id="user-menu">
                     <NavDropdown.Item>Profile</NavDropdown.Item>
-                    <NavDropdown.Item>Activity action</NavDropdown.Item>
+                    <NavDropdown.Item>Activity</NavDropdown.Item>
                     <NavDropdown.Item>Collection</NavDropdown.Item>
                     <NavDropdown.Divider />
                     <NavDropdown.Item onClick={this.logout}>Logout</NavDropdown.Item>

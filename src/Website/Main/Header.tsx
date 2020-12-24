@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, FormControl, Nav, Navbar, NavDropdown} from "react-bootstrap";
+import {Nav, Navbar} from "react-bootstrap";
 import Login from "../Modal/Login";
 import UserContext from "../Context/UserContext";
 import UserMenu from "../Menu/UserMenu";
@@ -14,19 +14,19 @@ export default class Header extends React.Component<Props, State> {
         return (
             <header>
                 <Navbar bg="light" expand='sm'>
-                    <Navbar.Brand href="#">JYWorld</Navbar.Brand>
+                    <Navbar.Brand href="/#">JYWorld</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="mr-auto">
-                            <Nav.Link href="#/">Home</Nav.Link>
-                            <Nav.Link href="#/board">Board</Nav.Link>
+                            <Nav.Link href="/#">Home</Nav.Link>
+                            <Nav.Link href="/#/board">Board</Nav.Link>
                         </Nav>
 
                         <UserContext.Consumer>
                             {(ctx) => {
                                 if (ctx.nickname) {
                                     return (
-                                        <UserMenu></UserMenu>
+                                        <UserMenu/>
                                     )
                                 } else {
                                     return (

@@ -6,6 +6,7 @@ import UserContext from "../Context/UserContext";
 type Props = {};
 type State = { page: number, size: number };
 export default class Board extends React.Component<Props, State> {
+    static contextType = UserContext;
     private tbodyRef: React.RefObject<HTMLTableElement>;
 
     constructor(props: Props) {
@@ -32,15 +33,15 @@ export default class Board extends React.Component<Props, State> {
             },
         }
 
-         fetch(url, request)
+        fetch(url, request)
             .then(response => response.json())
-             .then(test => {
-                 console.log(test);
-                 return test;
-             })
+            .then(test => {
+                console.log(test);
+                return test;
+            })
             .then(json => json['_embedded']['posts'])
-            .then(posts => posts.forEach((post:any, index:number)=>{
-                if(this.tbodyRef.current){
+            .then(posts => posts.forEach((post: any, index: number) => {
+                if (this.tbodyRef.current) {
                     const row = this.tbodyRef.current.insertRow();
                     row.insertCell(0).innerText = String(this.state.page * this.state.size + index); // index
                     row.insertCell(1).innerText = post['tag']; // tag
@@ -51,37 +52,29 @@ export default class Board extends React.Component<Props, State> {
 
                     row.onclick = () => alert(post['content']);
                     row.style.cursor = "pointer";
-                    row.onmouseover = () => row.style.backgroundColor='#FFF4E9';
-                    row.onmouseout = () => row.style.backgroundColor='';
+                    row.onmouseover = () => row.style.backgroundColor = '#FFF4E9';
+                    row.onmouseout = () => row.style.backgroundColor = '';
                 }
                 console.log(post, index)
             }))
             .catch(error => console.error());
     }
 
-    componentDidMount() {this.renderTable();}
+    componentDidMount() {
+        this.renderTable();
+    }
+
     render() {
         return (
-            <div className={'min-vh-100 offset-sm-2 col-sm-8'}>
+            <div className={'offset-sm-2 col-sm-8'}>
                 <h2>My Board</h2>
+                <Link to="/editor">
+                    <Button className="float-right"
+                            disabled={!this.context.token}
+                            variant={this.context.token? "primary":"outline-light"}>작성</Button>
+                </Link>
 
-                <UserContext.Consumer>
-                    {(ctx) => {
-                        if(ctx.token){
-                            return (
-                                <Link to="/editor">
-                                    <Button color="white" className="float-right" variant={'primary'}>작성</Button>
-                                </Link>
-                            )
-                        }else{
-                            return (
-                                <Button> 투명 버튼 </Button>
-                            );
-                        }
-                    }}
-                </UserContext.Consumer>
-
-                <table className="table" ref = {this.tbodyRef}>
+                <table className="table" ref={this.tbodyRef}>
                     <thead>
                     <tr>
                         <th>No</th>

@@ -8,7 +8,6 @@ type Props = {};
 type State = {};
 
 export default class Body extends React.Component<Props, State> {
-    // TODO: "oauth/*" route to about:blank
     render() {
         return (
             <Router>
@@ -16,7 +15,6 @@ export default class Body extends React.Component<Props, State> {
                     <Route path={"/"} exact component={Home}/>
                     <Route path={"/board"} exact component={Board}/>
                     <Route path={"/editor"} exact component={Editor}/>
-                    <Route path={"/oauth2/*"} component={()=>(<div></div>)}/>
                     <Redirect path={"*"} to={"/"}/>
                 </Switch>
             </Router>

@@ -34,7 +34,12 @@ export default class Login extends React.Component<Props, State> {
             .then(popup => server.getCode(popup))
             .then(code => server.getAccessToken(code))
             .then(token => UserInfo(token))
-            .then(userInfo => this.context.setContext(userInfo))
+            .then(userInfo => {
+                this.context.setContext(userInfo)
+                for(const [key, val] of Object.entries(userInfo)){
+                    sessionStorage.setItem(key, val as string)
+                }
+            })
             .catch(error => console.log(error))
     }
 
@@ -63,12 +68,12 @@ export default class Login extends React.Component<Props, State> {
                                         </Col>
                                     </Form.Group>
 
-                                    <Row className={"justify-content-md-center"}>
+                                    <Row className={"justify-content-sm-center"}>
                                         <Button as={Col} sm={{span: 10}} variant="primary" type="submit">
                                             로그인
                                         </Button>
                                     </Row>
-                                    <Row className={"justify-content-md-center"}>
+                                    <Row className={"justify-content-sm-center"}>
                                         <Button as={Col} sm={{span: 5}} variant="info">
                                             아이디/비밀번호 찾기
                                         </Button>
