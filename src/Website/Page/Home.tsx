@@ -1,8 +1,7 @@
 import React from 'react';
 
 type Props = {};
-type State = { page: number, size: number };
-
+type State = {};
 export default class Home extends React.Component<Props, State> {
     render() {
         return (

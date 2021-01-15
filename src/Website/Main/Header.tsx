@@ -1,14 +1,13 @@
 import React from 'react';
 import {Nav, Navbar} from "react-bootstrap";
 import Login from "../Modal/Login";
-import UserContext from "../Context/UserContext";
+import UserContext from "../System/Context/UserContext";
 import UserMenu from "../Menu/UserMenu";
 
 type Props = {};
 type State = {};
 
 export default class Header extends React.Component<Props, State> {
-    static contextType = UserContext;
 
     render() {
         return (
@@ -30,7 +29,7 @@ export default class Header extends React.Component<Props, State> {
                                     )
                                 } else {
                                     return (
-                                            <Login className={'mr-1'} variant={"outline-success"}>Sign Up</Login>
+                                        <Login className={'mr-1'} variant={"outline-success"}>Sign Up</Login>
                                     )
                                 }
                             }

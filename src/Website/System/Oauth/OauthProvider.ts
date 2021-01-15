@@ -1,10 +1,8 @@
-import packageJson from '../../../package.json';
-import {getCenterLocation} from "./RenderingUtils";
+import RenderUtils from "../../Utils/RenderUtils";
 import {UserContextType} from '../Context/UserContext';
 import OauthServer from "./OauthServer";
 
-const base_uri = process.env.PUBLIC_URL ? process.env.PUBLIC_URL : "http://localhost";
-const api_uri = packageJson.proxy.match("localhost") ? "https://api.jyworld.tk" : packageJson.proxy;
+const base_uri = process.env.PUBLIC_URL? process.env.PUBLIC_URL : "http://localhost";
 const provider = new Map();
 
 provider.set("google", new OauthServer({
@@ -49,13 +47,13 @@ export default function OauthProvider(servername: String): OauthServer {
 
 export async function PopupWindow(server: OauthServer) {
     return window.open(server.getAuthorizationUri(), "login",
-        getCenterLocation(500, 640, window));
+        RenderUtils.getCenterLocation(500, 640, window));
 }
 
 export async function UserInfo(token: string) {
-    return fetch(api_uri + "/member", {headers: {"Authorization": "Bearer " + token}})
+    return fetch("/member", {headers: {"Authorization": "Bearer " + token}})
         .then(req => req.json())
-        .then(json => json.nickname as string)
+        .then(json => json.nickname)
         .then(nickname => nickname? nickname: Promise.reject(new Error("nickname is empty")))
         .then(nickname => {
             return {token: token, nickname: nickname} as UserContextType

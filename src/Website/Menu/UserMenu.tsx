@@ -1,5 +1,5 @@
 import React from 'react'
-import UserContext from "../Context/UserContext";
+import UserContext from "../System/Context/UserContext";
 import {NavDropdown} from "react-bootstrap";
 
 export default class UserMenu extends React.Component<any, any> {
@@ -11,11 +11,7 @@ export default class UserMenu extends React.Component<any, any> {
     }
 
     logout(){
-        this.context.setContext({
-            token:undefined,
-            nickname:undefined
-        });
-
+        this.context.clear();
         sessionStorage.clear();
     }
 

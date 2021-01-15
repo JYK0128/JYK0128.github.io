@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, ButtonProps, Modal, Row, Form, Col, Container} from "react-bootstrap";
-import UserContext from "../Context/UserContext";
-import OauthProvider, {PopupWindow, UserInfo} from "../Utils/OauthProvider";
+import UserContext from "../System/Context/UserContext";
+import OauthProvider, {PopupWindow, UserInfo} from "../System/Oauth/OauthProvider";
 
 type Props = ButtonProps & {};
 type State = { show: boolean };
@@ -35,6 +35,7 @@ export default class Login extends React.Component<Props, State> {
             .then(code => server.getAccessToken(code))
             .then(token => UserInfo(token))
             .then(userInfo => {
+                userInfo.loginTime = new Date();
                 this.context.setContext(userInfo)
                 for(const [key, val] of Object.entries(userInfo)){
                     sessionStorage.setItem(key, val as string)
