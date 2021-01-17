@@ -5,6 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 ReactDOM.render(
-    <Website />,
+    <React.StrictMode>
+        <Website/>
+    </React.StrictMode>,
     document.getElementById('root')
 );

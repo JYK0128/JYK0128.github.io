@@ -5,7 +5,7 @@ export type UserContextType = {
     nickname: string | undefined,
     loginTime: Date | undefined,
     setContext: Function | undefined,
-    clear: Function
+    clear: Function | undefined
 }
 
 export const defaultValue:UserContextType = {
@@ -13,13 +13,7 @@ export const defaultValue:UserContextType = {
     nickname:undefined,
     loginTime:undefined,
     setContext:undefined,
-    clear(){
-        Object.keys(defaultValue).forEach((key) => {
-            if(!((defaultValue as any)[key] instanceof Function)){
-                delete (defaultValue as any)[key]
-            }
-        })
-    }
+    clear:undefined
 }
 
 export default React.createContext<UserContextType>(defaultValue);

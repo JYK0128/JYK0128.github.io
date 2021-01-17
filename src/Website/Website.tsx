@@ -13,20 +13,29 @@ export default class Website extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.setState = this.setState.bind(this);
+        this.clear = this.clear.bind(this);
+
         defaultValue.setContext = this.setState;
+        defaultValue.clear = this.clear;
         this.state = defaultValue;
     }
 
-    componentDidMount() {
-        const valid = this.isValid();
-        if (valid) {
+    clear() {
+        this.setState({
+            token: undefined,
+            nickname: undefined,
+            loginTime: undefined
+        });
+    }
+
+    componentDidMount(): void {
+        if (this.isValid()) {
             this.loadUserInfo();
         } else {
             this.unloadUserInfo();
         }
 
-        const expired = this.willExpired();
-        if (expired) {
+        if (this.willExpired()) {
             this.refreshAccess();
         }
     }
@@ -36,46 +45,28 @@ export default class Website extends React.Component<Props, State> {
         for (const key of Object.keys(this.state)) {
             obj[key] = sessionStorage.getItem(key);
         }
-        obj["setContext"] = this.setState;
         this.setState(obj as UserContextType);
     }
 
-    unloadUserInfo(): void {
+    unloadUserInfo() {
         sessionStorage.clear();
-        this.setState(this.context.defaultValue);
+        this.clear();
     }
 
     isValid(): boolean {
-        const loginTime = this.state.loginTime;
-
-        if(loginTime){
-            const now = new Date().getTime();
-            const login = loginTime.getTime();
-
-            if(now - login > 1000 * 60 * 60){
-                return false;
-            }
-        }
-        return true;
+        const loginTime = Date.parse(sessionStorage.getItem("loginTime")!);
+        const now = new Date().getTime();
+        return (now - loginTime < 1000 * 60 * 60)
     }
 
     willExpired(): boolean {
-        const loginTime = this.state.loginTime;
-
-        if(loginTime){
-            const now = new Date().getTime();
-            const login = loginTime.getTime();
-
-            if(now - login < 1000 * 60 * (60 - 10)){
-                return true;
-            }
-        }
-        return false;
+        const loginTime = Date.parse(sessionStorage.getItem("loginTime")!);
+        const now = new Date().getTime();
+        return (now - loginTime > 1000 * 60 * (60 - 10));
     }
 
-    //TODO:refreshAccessToken
+//TODO:refreshAccessToken
     refreshAccess(): void {
-
     }
 
     render() {

@@ -96,7 +96,6 @@ export default class Login extends React.Component<Props, State> {
                     </Modal.Body>
                 </Modal>
             </>
-        )
-            ;
+        );
     }
 }

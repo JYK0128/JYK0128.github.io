@@ -1,8 +1,10 @@
 import React from 'react';
 import {Button, Form} from "react-bootstrap";
 import UserContext from "../System/Context/UserContext";
-import {CollectionModel} from "hateoas-hal-types";
+import {CollectionModel, EntityModel} from "hateoas-hal-types";
 import FetchUtils from "../Utils/FetchUtils";
+import UploadType from "../System/Type/UploadType";
+import PostType from "../System/Type/PostType";
 
 type Props = {};
 type State = {};
@@ -14,41 +16,89 @@ export default class Editor extends React.Component<Props, State> {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
+    splitFormData(formData: FormData) {
+        const postForm = new FormData();
+        const fileForm = new FormData(); // not multipart
+
+        formData.forEach((value, key) => {
+            if (key === "files") {
+                const file = value as File;
+                if (file.size && file.name) {
+                    fileForm.append(key, value);
+                } else {
+                    if (file.size && !file.name) {
+                        throw new Error("filename is empty");
+                    } else if (!file.size && file.name) {
+                        throw new Error(`file \"${file.name}\" is 0 byte`);
+                    }
+                }
+            } else {
+                postForm.append(key, value);
+            }
+        })
+
+        return {postForm, fileForm};
+    }
+
+    async upload(fileForm: FormData) {
+        if (fileForm.has("files")) {
+            const req = FetchUtils.init();
+            req.setMethod("POST")
+            req.setToken(this.context.token);
+            req.setBody(fileForm);
+
+            return fetch("/upload", req)
+                .then(res => res.json())
+                .then((model: CollectionModel<UploadType>) => model._embedded.uploads)
+                .then(uploads => uploads.map(upload => upload._links.self.href))
+                .catch(error => console.error(error))
+        } else {
+            return new Array<string>();
+        }
+    }
+
+    writePost(postData: Record<string, any>):Promise<EntityModel<PostType>> {
+        const req = FetchUtils.init();
+        req.setMethod("POST");
+        req.setToken(this.context.token);
+        req.setContentType("application/json");
+        req.setBody(JSON.stringify(postData));
+
+        return fetch("/post", req)
+            .then(res => res.json())
+            .catch(() => this.cancelUpload(postData))
+    }
+
+    cancelUpload(postData: Record<string, any>) {
+        const req = FetchUtils.init();
+        req.setMethod("DELETE");
+        req.setToken(this.context.token);
+        req.setContentType("application/json");
+        req.setBody(postData["uploads"]);
+
+        fetch("/upload", req)
+            .catch((error) => console.error(error));
+    }
+
     handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const init = FetchUtils.init();
 
-        const uploadData = new FormData();
-        const uploadEntity = formData.getAll("files");
-        formData.delete("files");
-
-        //upload 파일 확인
-        for (let file of uploadEntity) {
-            file = file as File;
-            if (!(file.size && file.name)) {
-                if (uploadEntity.length > 1) return alert(`${file.name} is not valid.`);
-                if (uploadEntity.length === 1 && file.name) return alert(`${file.name} is not valid.`);
-                if (uploadEntity.length === 1 && !file.name) uploadEntity.pop();
+        (async () => {
+            const formData = new FormData(e.currentTarget);
+            let postForm, fileForm;
+            try {
+                ({postForm, fileForm} = this.splitFormData(formData));
+            } catch (error) {
+                alert(error.message);
+                return;
             }
-            uploadData.append("files", file);
-        }
 
-        // FormData
-        (async function () {
-            const uploads: string[] = [];
-            if(uploadEntity.length){
-                const res = await fetch("/upload", init.setBody(uploadData))
-                    .then(res => res.json() as Promise<CollectionModel>)
-                    .then(hal => hal._embedded?.uploads.map(upload => upload._links.self.href) as string[]);
-                uploads.push(...res);
-            }
-            const postData:Record<string, any> = Object.fromEntries(formData);
-            postData.uploads = uploads;
-
-            fetch("/post", init.setBody(postData).setContentType("application/json"))
-                .then(res => res.json())
-                .catch(() => uploads.forEach(upload => fetch(upload, init.setMethod("DELETE"))))
+            const postData: Record<string, any> = Object.fromEntries(postForm);
+            postData['uploads'] = await this.upload(fileForm);
+            const model = await this.writePost(postData);
+            const path = model._links.self.href;
+            const id = path.substring(path.lastIndexOf("/") + 1);
+            document.location.href=`#/board/${id}`;
         })();
     }
 

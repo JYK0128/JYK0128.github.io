@@ -1,6 +1,7 @@
 import RenderUtils from "../../Utils/RenderUtils";
 import {UserContextType} from '../Context/UserContext';
 import OauthServer from "./OauthServer";
+import FetchUtils from "../../Utils/FetchUtils";
 
 const base_uri = process.env.PUBLIC_URL? process.env.PUBLIC_URL : "http://localhost";
 const provider = new Map();
@@ -51,10 +52,12 @@ export async function PopupWindow(server: OauthServer) {
 }
 
 export async function UserInfo(token: string) {
-    return fetch("/member", {headers: {"Authorization": "Bearer " + token}})
+    const request = FetchUtils.init();
+    request.setToken(token);
+
+    return fetch("/member", request)
         .then(req => req.json())
         .then(json => json.nickname)
-        .then(nickname => nickname? nickname: Promise.reject(new Error("nickname is empty")))
         .then(nickname => {
             return {token: token, nickname: nickname} as UserContextType
         })

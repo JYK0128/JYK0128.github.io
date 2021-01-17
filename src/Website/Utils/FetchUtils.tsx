@@ -10,6 +10,16 @@ export default {
             headers: {} as Record<string, string>,
             body: null as BodyInit | null,
 
+            reset() {
+                this.method = 'GET';
+                this.mode = 'same-origin' as RequestMode;
+                this.cache = "default" as RequestCache;
+                this.credentials = 'same-origin' as RequestCredentials;
+                this.redirect = 'follow' as RequestRedirect;
+                this.referrer = 'client';
+                this.headers = {} as Record<string, string>;
+                this.body = null;
+            },
             setMethod(method: string) {
                 this.method = method;
                 return this;
@@ -52,14 +62,8 @@ export default {
                 this.referrer = referrer;
                 return this;
             },
-            setBody(content: BodyInit | Object) {
-                const bodyType = ["Blob", "BufferSource", "FormData", "URLSearchParams",
-                    "ReadableStream<Uint8Array>", "string"]
-                if (bodyType.includes(typeof content)) {
-                    this.body = content as BodyInit;
-                } else {
-                    this.body = JSON.stringify(content);
-                }
+            setBody(content: BodyInit) {
+                this.body = content;
                 return this;
             }
         }

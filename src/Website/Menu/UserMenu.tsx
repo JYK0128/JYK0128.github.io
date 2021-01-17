@@ -2,11 +2,13 @@ import React from 'react'
 import UserContext from "../System/Context/UserContext";
 import {NavDropdown} from "react-bootstrap";
 
-export default class UserMenu extends React.Component<any, any> {
+type Props = {}
+type State = {}
+export default class UserMenu extends React.Component<Props, State> {
     static contextType = UserContext;
-    constructor(props:any) {
-        super(props);
 
+    constructor(props:Props) {
+        super(props);
         this.logout = this.logout.bind(this);
     }
 

@@ -1,67 +1,93 @@
 import React from 'react';
 import {Link} from "react-router-dom";
-import {Button} from "react-bootstrap";
+import {Button, Table} from "react-bootstrap";
 import UserContext from "../System/Context/UserContext";
-import {EntityModel, PagedModel} from "hateoas-hal-types";
+import {PagedModel, EntityModel} from "hateoas-hal-types";
 import FetchUtils from "../Utils/FetchUtils";
 import PostType from "../System/Type/PostType";
+import {stringify} from "qs";
 import HalUtils from "../Utils/HalUtils";
 import MemberType from "../System/Type/MemberType";
-import {stringify} from "qs";
 
 type Props = {};
-type State = { page: number, size: number };
+type State = { page: number, size: number, data: any[] };
 export default class Board extends React.Component<Props, State> {
     static contextType = UserContext;
-    private tableRef: React.RefObject<HTMLTableElement>;
 
     constructor(props: Props) {
         super(props);
         this.state = {
             page: 0,
-            size: 10
+            size: 10,
+            data: []
         };
 
-        this.tableRef = React.createRef<HTMLTableElement>();
-        this.renderTable = this.renderTable.bind(this);
+        this.fetchData = this.fetchData.bind(this);
     }
 
-    renderTable() {
-        const url = '/post?' + stringify(this.state);
-        const init = FetchUtils.init();
-        init.addHeaders({'Content-Type': 'Application/JSON'})
+    //TODO: 성능 개선
+    fetchData() {
+        (async () => {
+            const init = FetchUtils.init();
+            const url = '/post?' + stringify(this.state);
+            init.addHeaders({'Content-Type': 'Application/JSON'})
+            const response = await fetch(url, init);
+            const model: PagedModel<PostType> = await response.json();
+            const posts = model._embedded.posts;
+            const memberLinks = posts.map(post => post._links.writer);
 
-        fetch(url, init)
-            .then(response => response.json())
-            .then((json:PagedModel<PostType>) => json._embedded.posts)
-            .then(posts => posts.forEach(async (post, index) => {
-                if (this.tableRef.current) {
-                    const row = this.tableRef.current.insertRow();
-                    const writer = await HalUtils.getData<MemberType>(post._links.writer);
-
-                    row.insertCell(0).innerText = String(this.state.page * this.state.size + index + 1);
-                    row.insertCell(1).innerText = post['tag'];
-                    row.insertCell(2).innerText = post['title'];
-                    row.insertCell(3).innerText = writer['nickname'];
-                    row.insertCell(4).innerText = post['createDate'].toString();
-                    row.insertCell(5).innerText = post['views'].toString();
-
-                    row.onclick = () => {
-                        const url = new URL(post._links.self.href);
-                        const path = url.pathname;
-                        const id = path.substring(path.lastIndexOf("/") + 1);
-                        document.location.href=`#/board/${id}`
-                    }
-                    row.style.cursor = "pointer";
-                    row.onmouseover = () => row.style.backgroundColor = '#FFF4E9';
-                    row.onmouseout = () => row.style.backgroundColor = '';
+            const members = await Promise.all(memberLinks.map((link) => HalUtils.getData<MemberType>(link)));
+            const memberNames = members.map(member => member.nickname);
+            const board = posts.map((post, index) => {
+                const path = post._links.self.href;
+                return {
+                    id: path.substring(path.lastIndexOf("/") + 1),
+                    tag: post.tag,
+                    title: post.title,
+                    writer: memberNames[index],
+                    createDate: post.createDate,
+                    views: post.views,
                 }
-            }))
-            .catch(() => console.error());
+            })
+            this.setState({data: board})
+        })();
     }
 
     componentDidMount() {
-        this.renderTable();
+        this.fetchData()
+    }
+
+    tableHead() {
+        return (
+            <tr>
+                <th>No</th>
+                <th>tag</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성날짜</th>
+                <th>조회수</th>
+            </tr>
+        )
+    }
+
+    onclick(index:number){
+        document.location.href=`#/board/${index}`
+    }
+
+    //TODO: reverse sort
+    tableBody() {
+        const {page, size, data} = this.state;
+
+        return data.map((post, index) => (
+            <tr key={index} onClick={() => this.onclick(index)}>
+                <td>{post.id}</td>
+                <td>{post.tag}</td>
+                <td>{post.title}</td>
+                <td>{post.writer}</td>
+                <td>{post.createDate}</td>
+                <td>{post.views}</td>
+            </tr>
+        ));
     }
 
     render() {
@@ -71,21 +97,14 @@ export default class Board extends React.Component<Props, State> {
                 <Link to="/editor">
                     <Button className="float-right"
                             disabled={!this.context.token}
-                            variant={this.context.token? "primary":"outline-light"}>작성</Button>
+                            variant={this.context.token ? "primary" : "outline-light"}>작성</Button>
                 </Link>
 
-                <table className="table" ref={this.tableRef}>
-                    <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Tag</th>
-                        <th>제목</th>
-                        <th>작성자</th>
-                        <th>작성날짜</th>
-                        <th>조회수</th>
-                    </tr>
-                    </thead>
-                </table>
+                <Table striped hover>
+                    <thead>{this.tableHead()}</thead>
+                    <tbody>{this.tableBody()}</tbody>
+
+                </Table>
             </div>
         );
     }

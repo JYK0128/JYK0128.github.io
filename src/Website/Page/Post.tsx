@@ -47,6 +47,7 @@ export default class Post extends React.Component<Props, State>{
     componentDidMount() {
         const init = {method: "GET"};
 
+        //TODO: error
         fetch("/post/" + this.id, init)
             .then(res => res.json())
             .then((json: EntityModel<PostType>) => {
